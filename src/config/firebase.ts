@@ -1,5 +1,4 @@
 import * as admin from 'firebase-admin';
-import { NotificationPayload } from '../types';
 import * as path from 'path';
 
 let firebaseApp: admin.app.App | null = null;
@@ -24,12 +23,11 @@ export function initializeFirebase(): admin.app.App {
     let credential: admin.credential.Credential;
     
     if (serviceAccountPath) {
-      console.log('🔑 Using Firebase service account key file');
+      console.log('Using Firebase service account key file');
       const absolutePath = path.resolve(process.cwd(), serviceAccountPath);
       credential = admin.credential.cert(require(absolutePath));
     } else {
-      console.log('🔑 Using Firebase default credentials');
-      console.log('🔑 Using Firebase default credentials');
+      console.log('Using Firebase default credentials');
       credential = admin.credential.applicationDefault();
     }
 

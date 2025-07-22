@@ -40,32 +40,32 @@ async function validateApiKey(req: Request, res: Response, next: NextFunction) {
 
     // Validate API key against database
     const db = getFirestore();
-    console.log(`🔍 Querying Firestore for API key: ${apiKey}`);
-    console.log(`🔍 Collection: apiKeys, Document ID: ${apiKey}`);
+    console.log(`Querying Firestore for API key: ${apiKey}`);
+    console.log(`Collection: apiKeys, Document ID: ${apiKey}`);
     
     // Debug: Try to list collections to see what's accessible
     try {
-      console.log('🔍 Testing Firestore access - listing collections...');
+      console.log('Testing Firestore access - listing collections...');
       const collections = await db.listCollections();
-      console.log(`🔍 Found ${collections.length} collections:`, collections.map(c => c.id));
+      console.log(`Found ${collections.length} collections:`, collections.map(c => c.id));
     } catch (listError) {
-      console.log('🔍 Error listing collections:', (listError as Error).message);
+      console.log('Error listing collections:', (listError as Error).message);
     }
     
     // Debug: Try to get the apiKeys collection reference
     try {
-      console.log('🔍 Getting apiKeys collection reference...');
+      console.log('Getting apiKeys collection reference...');
       const apiKeysCollection = db.collection('apiKeys');
-      console.log('🔍 apiKeys collection reference created successfully');
+      console.log('apiKeys collection reference created successfully');
       
       // Try to list documents in the collection
       const snapshot = await apiKeysCollection.limit(5).get();
-      console.log(`🔍 Found ${snapshot.size} documents in apiKeys collection`);
+      console.log(`Found ${snapshot.size} documents in apiKeys collection`);
       snapshot.docs.forEach(doc => {
-        console.log(`🔍 Document ID: ${doc.id}`);
+        console.log(`Document ID: ${doc.id}`);
       });
     } catch (collectionError) {
-      console.log('🔍 Error accessing apiKeys collection:', (collectionError as Error).message);
+      console.log('Error accessing apiKeys collection:', (collectionError as Error).message);
     }
     
     const apiKeyDoc = await db.collection('apiKeys').doc(apiKey).get();

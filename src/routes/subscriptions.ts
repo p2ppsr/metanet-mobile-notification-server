@@ -34,6 +34,7 @@ const permissionSchema = Joi.object({
  */
 router.post('/register', validateApiKey, async (req, res) => {
   try {
+    console.log('🔍 Validating subscription request:', req.body);
     // Validate request body
     const { error, value } = subscriptionSchema.validate(req.body);
     if (error) {
@@ -58,6 +59,7 @@ router.post('/register', validateApiKey, async (req, res) => {
 
     // Extract FCM token from endpoint
     const fcmToken = extractFCMToken(endpoint);
+    console.log('🗝️ Extracted FCM token:', fcmToken);
     if (!fcmToken) {
       return res.status(400).json({
         error: 'Invalid Endpoint',
@@ -67,6 +69,7 @@ router.post('/register', validateApiKey, async (req, res) => {
 
     // Generate unique user key for this user-origin combination
     const userKey = generateUserKey(userId, origin);
+    console.log('🆔 Generated user key:', userKey);
 
     // In development, skip Firestore operations
     const isDev = process.env.NODE_ENV !== 'production' && 
@@ -110,6 +113,7 @@ router.post('/register', validateApiKey, async (req, res) => {
       updatedAt: Date.now(),
       active: true
     };
+    console.log('📦 Subscription data prepared for database:', subscriptionData);
 
     // If subscription exists, merge permissions
     if (existingDoc.exists) {
@@ -140,6 +144,7 @@ router.post('/register', validateApiKey, async (req, res) => {
       timestamp: Date.now()
     });
 
+    console.log('✅ Subscription registered successfully for userKey:', userKey);
     res.status(200).json({
       success: true,
       userKey: userKey,
@@ -217,8 +222,7 @@ router.delete('/:userKey', validateApiKey, async (req, res) => {
       timestamp: Date.now()
     });
 
-    console.log(`🚫 Removed subscription for userKey: ${userKey.substring(0, 8)}... from origin: ${origin}`);
-
+    console.log('🗑️ Subscription removed successfully for userKey:', userKey);
     res.status(200).json({
       success: true,
       message: 'Subscription removed successfully'
