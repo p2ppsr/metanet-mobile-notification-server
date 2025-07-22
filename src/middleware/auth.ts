@@ -17,7 +17,7 @@ async function validateApiKey(req: Request, res: Response, next: NextFunction) {
       });
     }
 
-    const apiKey = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const apiKey = authHeader.substring(7);
     
     // In development, allow test API key (check BEFORE length validation)
     if (process.env.NODE_ENV !== 'production' && apiKey === 'dev-test-api-key-12345') {
