@@ -1,10 +1,10 @@
-import express, { Request, Response } from 'express';
-import Joi from 'joi';
-import { v4 as uuidv4 } from 'uuid';
-import { sendNotification, getFirestore } from '../config/firebase';
-import { validateApiKey } from '../middleware/auth';
-import { AuthenticatedRequest } from '../types';
-import * as admin from 'firebase-admin';
+import express, { Request, Response } from "express";
+import Joi from "joi";
+import { v4 as uuidv4 } from "uuid";
+import { sendNotification, getFirestore } from "../config/firebase";
+import { validateApiKey } from "../middleware/auth";
+import { AuthenticatedRequest } from "../types";
+import * as admin from "firebase-admin";
 
 const router = express.Router();
 
@@ -16,28 +16,28 @@ const notificationSchema = Joi.object({
     body: Joi.string().required().max(200),
     icon: Joi.string().uri().optional(),
     badge: Joi.number().integer().min(0).optional(),
-    data: Joi.object().optional()
+    data: Joi.object().optional(),
   }).required(),
   options: Joi.object({
     requireInteraction: Joi.boolean().optional(),
     silent: Joi.boolean().optional(),
     tag: Joi.string().optional(),
-    timestamp: Joi.number().optional()
-  }).optional()
+    timestamp: Joi.number().optional(),
+  }).optional(),
 });
 
 /**
  * POST /api/v1/notifications/send
  * Send a push notification to a user
  */
-router.post('/send', validateApiKey, async (req, res) => {
+router.post("/send", validateApiKey, async (req, res) => {
   try {
     // Validate request body
     const { error, value } = notificationSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
-        error: 'Validation Error',
-        message: error.details[0]?.message || 'Validation failed'
+        error: "Validation Error",
+        message: error.details[0]?.message || "Validation failed",
       });
     }
 
@@ -47,21 +47,23 @@ router.post('/send', validateApiKey, async (req, res) => {
     // Ensure origin is defined (should be set by middleware)
     if (!origin) {
       return res.status(500).json({
-        error: 'Server Error',
-        message: 'Request origin not properly set by middleware'
+        error: "Server Error",
+        message: "Request origin not properly set by middleware",
       });
     }
 
-    console.log(`📤 Notification request from ${origin} for userKey: ${userKey.substring(0, 8)}...`);
+    console.log(
+      `📤 Notification request from ${origin} for userKey: ${userKey.substring(0, 8)}...`,
+    );
 
     // Get user subscription from database
     const db = getFirestore();
-    const userDoc = await db.collection('subscriptions').doc(userKey).get();
+    const userDoc = await db.collection("subscriptions").doc(userKey).get();
 
     if (!userDoc.exists) {
       return res.status(404).json({
-        error: 'User Not Found',
-        message: 'No subscription found for this user key'
+        error: "User Not Found",
+        message: "No subscription found for this user key",
       });
     }
 
@@ -70,24 +72,29 @@ router.post('/send', validateApiKey, async (req, res) => {
     // Check if userData exists
     if (!userData) {
       return res.status(500).json({
-        error: 'Data Error',
-        message: 'User subscription data is corrupted or missing'
+        error: "Data Error",
+        message: "User subscription data is corrupted or missing",
       });
     }
 
     // Verify origin has permission
-    if (!userData.permissions || !userData.permissions[origin] || !userData.permissions[origin].granted) {
+    if (
+      !userData.permissions ||
+      !userData.permissions[origin] ||
+      !userData.permissions[origin].granted
+    ) {
       return res.status(403).json({
-        error: 'Permission Denied',
-        message: 'Origin does not have permission to send notifications to this user'
+        error: "Permission Denied",
+        message:
+          "Origin does not have permission to send notifications to this user",
       });
     }
 
     // Check if FCM token exists
     if (!userData.fcmToken) {
       return res.status(400).json({
-        error: 'No FCM Token',
-        message: 'User has no valid FCM token for notifications'
+        error: "No FCM Token",
+        message: "User has no valid FCM token for notifications",
       });
     }
 
@@ -102,20 +109,20 @@ router.post('/send', validateApiKey, async (req, res) => {
         ...notification.data,
         origin: origin,
         messageId: messageId,
-        timestamp: Date.now().toString()
-      }
+        timestamp: Date.now().toString(),
+      },
     };
 
     await sendNotification(userData.fcmToken, payload);
 
     // Log notification for analytics
-    await db.collection('notifications').doc(messageId).set({
+    await db.collection("notifications").doc(messageId).set({
       userKey: userKey,
       origin: origin,
       title: notification.title,
       body: notification.body,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
-      status: 'sent'
+      status: "sent",
     });
 
     console.log(`✅ Notification sent successfully - MessageID: ${messageId}`);
@@ -123,24 +130,25 @@ router.post('/send', validateApiKey, async (req, res) => {
     res.status(200).json({
       success: true,
       messageId: messageId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
     return;
-
   } catch (error) {
-    console.error('❌ Error sending notification:', error);
-    
-    if ((error as any).code === 'messaging/invalid-registration-token' || 
-        (error as any).code === 'messaging/registration-token-not-registered') {
+    console.error("❌ Error sending notification:", error);
+
+    if (
+      (error as any).code === "messaging/invalid-registration-token" ||
+      (error as any).code === "messaging/registration-token-not-registered"
+    ) {
       return res.status(410).json({
-        error: 'Invalid Token',
-        message: 'FCM token is no longer valid'
+        error: "Invalid Token",
+        message: "FCM token is no longer valid",
       });
     }
 
     res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Failed to send notification'
+      error: "Internal Server Error",
+      message: "Failed to send notification",
     });
     return;
   }
@@ -150,51 +158,53 @@ router.post('/send', validateApiKey, async (req, res) => {
  * GET /api/v1/notifications/status/:messageId
  * Check the status of a sent notification
  */
-router.get('/status/:messageId', validateApiKey, async (req, res) => {
+router.get("/status/:messageId", validateApiKey, async (req, res) => {
   try {
     const { messageId } = req.params;
-    
+
     // Validate messageId parameter
     if (!messageId) {
       return res.status(400).json({
-        error: 'Invalid Request',
-        message: 'Message ID parameter is required'
+        error: "Invalid Request",
+        message: "Message ID parameter is required",
       });
     }
-    
+
     const db = getFirestore();
-    const notificationDoc = await db.collection('notifications').doc(messageId).get();
-    
+    const notificationDoc = await db
+      .collection("notifications")
+      .doc(messageId)
+      .get();
+
     if (!notificationDoc.exists) {
       return res.status(404).json({
-        error: 'Notification Not Found',
-        message: 'No notification found with this message ID'
+        error: "Notification Not Found",
+        message: "No notification found with this message ID",
       });
     }
 
     const notificationData = notificationDoc.data();
-    
+
     // Check if notificationData exists
     if (!notificationData) {
       return res.status(500).json({
-        error: 'Data Error',
-        message: 'Notification data is corrupted or missing'
+        error: "Data Error",
+        message: "Notification data is corrupted or missing",
       });
     }
-    
+
     res.status(200).json({
       messageId: messageId,
       status: notificationData.status,
       timestamp: notificationData.timestamp,
-      origin: notificationData.origin
+      origin: notificationData.origin,
     });
     return;
-
   } catch (error) {
-    console.error('❌ Error checking notification status:', error);
+    console.error("❌ Error checking notification status:", error);
     res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Failed to check notification status'
+      error: "Internal Server Error",
+      message: "Failed to check notification status",
     });
     return;
   }

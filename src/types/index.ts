@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request } from "express";
 
 // Push subscription types
 export interface PushSubscription {
@@ -11,7 +11,7 @@ export interface PushSubscription {
 }
 
 export interface DeviceInfo {
-  platform: 'ios' | 'android' | 'web';
+  platform: "ios" | "android" | "web";
   appVersion?: string;
   deviceId?: string;
 }
@@ -78,7 +78,7 @@ export interface ApiKeyInfo {
   createdBy: string;
   createdAt: number;
   expiresAt?: number;
-  environment?: 'development' | 'production';
+  environment?: "development" | "production";
 }
 
 export interface NotificationLog {
@@ -88,7 +88,7 @@ export interface NotificationLog {
   title: string;
   body: string;
   timestamp: any; // Firestore timestamp
-  status: 'sent' | 'delivered' | 'failed';
+  status: "sent" | "delivered" | "failed";
 }
 
 // Express extended request types
@@ -98,7 +98,7 @@ export interface AuthenticatedRequest extends Request {
     origin: string;
     permissions: string[];
     createdBy: string;
-    environment: 'development' | 'production';
+    environment: "development" | "production";
   };
 }
 
@@ -123,7 +123,7 @@ export interface SuccessResponse<T = any> extends ApiResponse<T> {
 
 // Health check types
 export interface HealthCheck {
-  status: 'healthy' | 'unhealthy' | 'ready' | 'not ready' | 'alive' | 'error';
+  status: "healthy" | "unhealthy" | "ready" | "not ready" | "alive" | "error";
   service: string;
   version: string;
   timestamp: string;
