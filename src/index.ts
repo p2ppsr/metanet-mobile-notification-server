@@ -1,8 +1,8 @@
+import './config/env';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 
 import { initializeFirebase } from './config/firebase';
 import notificationRoutes from './routes/notifications';
@@ -10,8 +10,6 @@ import subscriptionRoutes from './routes/subscriptions';
 import healthRoutes from './routes/health';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimitMiddleware } from './middleware/rateLimiter';
-
-dotenv.config();
 
 const app = express();
 const PORT: number = parseInt(process.env.PORT || '3000', 10);

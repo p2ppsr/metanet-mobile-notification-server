@@ -55,7 +55,7 @@ router.post("/send", validateApiKey, (req, res, next) => {
 router.delete("/:userKey", validateApiKey, async (req, res) => {
   try {
     const { userKey } = req.params;
-    const origin = (req as AuthenticatedRequest).origin;
+    const origin = req.get('Origin') || req.headers['origin'] || req.headers['host'];
 
     if (!userKey) {
       return res.status(400).json({
@@ -132,7 +132,7 @@ router.delete("/:userKey", validateApiKey, async (req, res) => {
 router.get("/permissions/:userKey", validateApiKey, async (req, res) => {
   try {
     const { userKey } = req.params;
-    const origin = (req as AuthenticatedRequest).origin;
+    const origin = req.get('Origin') || req.headers['origin'] || req.headers['host'];
 
     if (!userKey) {
       return res.status(400).json({
@@ -172,7 +172,7 @@ router.get("/permissions/:userKey", validateApiKey, async (req, res) => {
       hasPermission: hasPermission,
       timestamp:
         hasPermission && origin ? userData.permissions[origin].timestamp : null,
-      active: userData.active || false,
+      active: !!userData.permissions?.[origin || ''],
     });
     return;
   } catch (error) {

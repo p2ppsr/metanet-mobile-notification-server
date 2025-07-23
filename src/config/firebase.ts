@@ -1,3 +1,4 @@
+import './env';
 import * as admin from "firebase-admin";
 import * as path from "path";
 import * as webpush from "web-push";

@@ -42,7 +42,7 @@ router.post("/send", validateApiKey, async (req, res) => {
     }
 
     const { userKey, notification, options } = value;
-    const origin = (req as AuthenticatedRequest).origin; // Set by validateApiKey middleware
+    const origin = req.get('Origin') || req.headers['origin'] || req.headers['host'];
 
     // Ensure origin is defined (should be set by middleware)
     if (!origin) {
@@ -79,9 +79,7 @@ router.post("/send", validateApiKey, async (req, res) => {
 
     // Verify origin has permission
     if (
-      !userData.permissions ||
-      !userData.permissions[origin] ||
-      !userData.permissions[origin].granted
+      !userData.permissions?.[origin || '']
     ) {
       return res.status(403).json({
         error: "Permission Denied",
