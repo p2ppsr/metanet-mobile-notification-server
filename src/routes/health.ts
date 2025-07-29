@@ -8,6 +8,7 @@ const router = express.Router();
  * Basic health check endpoint
  */
 router.get("/", (req, res) => {
+  console.log("Health check request received");
   res.status(200).json({
     status: "healthy",
     service: "Metanet Notification Backend",
@@ -22,6 +23,7 @@ router.get("/", (req, res) => {
  * Readiness probe - checks if all dependencies are available
  */
 router.get("/ready", async (req, res) => {
+  console.log("Readiness check request received");
   try {
     const checks = {
       firebase: false,
@@ -81,6 +83,7 @@ router.get("/ready", async (req, res) => {
  * Liveness probe - simple check that the server is running
  */
 router.get("/live", (req, res) => {
+  console.log("Liveness check request received");
   res.status(200).json({
     status: "alive",
     timestamp: new Date().toISOString(),

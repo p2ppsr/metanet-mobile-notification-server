@@ -20,6 +20,7 @@ initializeFirebase();
 // Middleware
 app.use(helmet()); // Security headers
 app.use(morgan('combined')); // Logging
+app.use(cors()); // CORS support
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [/\.babbage\.systems$/, /\.metanet\.app$/] 
